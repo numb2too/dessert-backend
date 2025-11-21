@@ -2,28 +2,7 @@
 ## Python + Flask/APIFlask 架構
 
 ## 執行
-### python
-```bash
-# 1. 建立名為 venv 的虛擬環境
-python -m venv venv
-
-# 2. 啟動虛擬環境
-# Mac/Linux:
-source venv/bin/activate
-# Windows:
-# venv\Scripts\activate
-
-```
-需先安裝
-```bash
-pip install -r requirements.txt
-```
-啟動
-```bash
-python run.py
-```
-
-### docker 
+### docker (推薦)
 確認 docker 資訊
 ```bash
 docker info
@@ -38,6 +17,31 @@ brew reinstall --cask docker
 ```bash
 docker compose up --build
 ```
+> 使用 docker 啟動資料才會存到 mysql
+> 因為 mysql 是跟 web 一起啟動
+> 但有分不同 container 
+
+### python
+```bash
+# 1. 建立名為 venv 的虛擬環境
+python -m venv venv
+
+# 2. 啟動虛擬環境
+# Mac/Linux:
+source venv/bin/activate
+# Windows:
+# venv\Scripts\activate
+```
+需先安裝
+```bash
+pip install -r requirements.txt
+```
+啟動
+```bash
+python run.py
+```
+> 資料只存在 memory 沒有存到 mysql
+> mysql 需透過 docker 開啟並連接
 
 ## unit test
 ```bash
@@ -51,4 +55,17 @@ tests/test_user_routes.py ...                                                   
 tests/test_user_service.py ...                                                                                    [100%]
 
 =================================================== 6 passed in 0.17s =====
+```
+使用 docker pytest
+```bash
+dessert-backend % docker-compose exec web pytest                                                        
+================================================================ test session starts ================================================================
+platform linux -- Python 3.13.9, pytest-9.0.1, pluggy-1.6.0
+rootdir: /app
+collected 21 items                                                                                                                                  
+
+tests/test_user_routes.py ...........                                                                                                         [ 52%]
+tests/test_user_service.py ..........                                                                                                         [100%]
+
+================================================================ 21 passed in 0.11s    
 ```
