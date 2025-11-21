@@ -3,6 +3,7 @@ services:
     build: .
     ports:
       - "5001:1234"
+      - "5678:5678"  # 新增 debugpy port
     volumes:
       - .:/app
     environment:

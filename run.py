@@ -81,4 +81,9 @@ if not os.getenv("TESTING"):
     init_database(app)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=1234, debug=True)
+    import debugpy
+
+    debugpy.listen(("0.0.0.0", 5678))
+    print("⏳ Waiting for debugger to attach...")
+
+    app.run(host="0.0.0.0", port=1234, debug=False)
