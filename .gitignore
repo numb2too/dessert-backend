@@ -1,50 +1,75 @@
-# ----- Python -----
+# .gitignore
+# Python
 __pycache__/
 *.py[cod]
 *$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-# 虛擬環境（非常重要）
+# Virtual Environment
 venv/
+ENV/
 env/
-.venv/
+.venv
 
-# Jupyter Notebook checkpoint（如果未來有 Notebook）
-.ipynb_checkpoints/
-
-# pip install 的暫存
-pip-log.txt
-pip-delete-this-directory.txt
-
-# ----- Flask / APIFlask -----
-instance/
-*.db
-*.sqlite3
-
-# ----- 環境設定 -----
-.env
-*.env
-
-# ----- 系統檔 -----
-.DS_Store
-Thumbs.db
-
-# ----- IDE 設定 -----
-# VSCode
+# IDE
 .vscode/
-# PyCharm
 .idea/
+*.swp
+*.swo
+*~
 
-# ----- 測試 -----
-coverage/
+# Testing
+.pytest_cache/
+.coverage
 htmlcov/
 .tox/
 .nox/
-.pytest_cache/
 
-# ----- log -----
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
 *.log
 
-# ----- build/output -----
-dist/
-build/
-*.egg-info/
+# Backup files
+backups/
+*.sql
+*.sql.gz
+
+# Compiled files
+*.pyc
+*.pyo
+
+# Documentation
+docs/_build/

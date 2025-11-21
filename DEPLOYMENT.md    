@@ -1,0 +1,658 @@
+# 🚀 部署指南
+
+## 目錄
+- [本地開發環境](#本地開發環境)
+- [Docker 部署](#docker-部署)
+- [生產環境部署](#生產環境部署)
+- [資料庫管理](#資料庫管理)
+- [監控與維護](#監控與維護)
+- [故障排除](#故障排除)
+
+## 本地開發環境
+
+### 1. 安裝依賴
+
+```bash
+# 安裝 Python 3.11+
+sudo apt-get update
+sudo apt-get install python3.11 python3.11-venv python3-pip
+
+# 安裝 MySQL
+sudo apt-get install mysql-server mysql-client libmysqlclient-dev
+
+# 安裝 Redis (可選)
+sudo apt-get install redis-server
+```
+
+### 2. 建立開發環境
+
+```bash
+# 克隆專案
+git clone https://github.com/yourusername/bakery-management-system.git
+cd bakery-management-system
+
+# 建立虛擬環境
+python3.11 -m venv venv
+source venv/bin/activate
+
+# 安裝 Python 依賴
+pip install -r requirements.txt
+```
+
+### 3. 配置資料庫
+
+```bash
+# 登入 MySQL
+mysql -u root -p
+
+# 建立資料庫和使用者
+CREATE DATABASE bakery_dev CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE bakery_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'bakery_user'@'localhost' IDENTIFIED BY 'bakery_pass';
+GRANT ALL PRIVILEGES ON bakery_dev.* TO 'bakery_user'@'localhost';
+GRANT ALL PRIVILEGES ON bakery_test.* TO 'bakery_user'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+### 4. 初始化應用
+
+```bash
+# 複製環境變數
+cp .env.example .env
+
+# 編輯 .env 檔案
+vim .env
+
+# 執行資料庫遷移
+flask db upgrade
+
+# 填充測試資料
+python manage.py seed-db
+
+# 建立管理員
+python manage.py create-admin
+
+# 啟動開發伺服器
+flask run --debug
+```
+
+訪問 http://localhost:5000/docs 查看 API 文檔
+
+## Docker 部署
+
+### 快速啟動
+
+```bash
+# 使用 Docker Compose 啟動所有服務
+docker-compose up -d
+
+# 查看服務狀態
+docker-compose ps
+
+# 查看日誌
+docker-compose logs -f web
+
+# 執行資料庫遷移
+docker-compose exec web flask db upgrade
+
+# 填充測試資料
+docker-compose exec web python manage.py seed-db
+```
+
+### 自訂配置
+
+建立 `docker-compose.override.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  web:
+    environment:
+      - FLASK_ENV=production
+      - WORKERS=8
+    ports:
+      - "8000:5000"
+  
+  db:
+    volumes:
+      - /path/to/backup:/backup
+```
+
+### Docker 命令
+
+```bash
+# 重新建構映像
+docker-compose build --no-cache
+
+# 停止所有服務
+docker-compose down
+
+# 停止並刪除所有資料
+docker-compose down -v
+
+# 進入容器 Shell
+docker-compose exec web bash
+
+# 執行 Python 命令
+docker-compose exec web python manage.py seed-db
+
+# 查看特定服務日誌
+docker-compose logs -f db
+```
+
+## 生產環境部署
+
+### 方案 1: Ubuntu Server + Systemd
+
+#### 1. 準備伺服器
+
+```bash
+# 更新系統
+sudo apt-get update && sudo apt-get upgrade -y
+
+# 安裝必要套件
+sudo apt-get install -y python3.11 python3.11-venv \
+    mysql-server nginx git supervisor
+
+# 建立應用使用者
+sudo useradd -m -s /bin/bash bakery
+sudo su - bakery
+```
+
+#### 2. 部署應用
+
+```bash
+# 克隆專案
+cd /home/bakery
+git clone https://github.com/yourusername/bakery-management-system.git app
+cd app
+
+# 建立虛擬環境
+python3.11 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+
+# 配置環境變數
+cp .env.example .env
+vim .env  # 編輯生產配置
+
+# 執行資料庫遷移
+flask db upgrade
+```
+
+#### 3. 配置 Systemd Service
+
+建立 `/etc/systemd/system/bakery-api.service`:
+
+```ini
+[Unit]
+Description=Bakery Management System API
+After=network.target mysql.service
+
+[Service]
+User=bakery
+Group=bakery
+WorkingDirectory=/home/bakery/app
+Environment="PATH=/home/bakery/app/venv/bin"
+ExecStart=/home/bakery/app/venv/bin/gunicorn \
+    --bind 127.0.0.1:5000 \
+    --workers 4 \
+    --threads 2 \
+    --timeout 120 \
+    --access-logfile /var/log/bakery/access.log \
+    --error-logfile /var/log/bakery/error.log \
+    wsgi:app
+
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
+```
+
+啟動服務:
+
+```bash
+# 建立日誌目錄
+sudo mkdir -p /var/log/bakery
+sudo chown bakery:bakery /var/log/bakery
+
+# 啟動服務
+sudo systemctl daemon-reload
+sudo systemctl start bakery-api
+sudo systemctl enable bakery-api
+
+# 檢查狀態
+sudo systemctl status bakery-api
+```
+
+#### 4. 配置 Nginx
+
+建立 `/etc/nginx/sites-available/bakery-api`:
+
+```nginx
+upstream bakery_api {
+    server 127.0.0.1:5000 fail_timeout=0;
+}
+
+server {
+    listen 80;
+    server_name api.bakery.example.com;
+
+    # Redirect to HTTPS
+    return 301 https://$server_name$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
+    server_name api.bakery.example.com;
+
+    # SSL 配置
+    ssl_certificate /etc/letsencrypt/live/api.bakery.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/api.bakery.example.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # 日誌
+    access_log /var/log/nginx/bakery-api-access.log;
+    error_log /var/log/nginx/bakery-api-error.log;
+
+    # 安全標頭
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+
+    # 上傳限制
+    client_max_body_size 10M;
+
+    location / {
+        proxy_pass http://bakery_api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        
+        # Timeout 設定
+        proxy_connect_timeout 120s;
+        proxy_send_timeout 120s;
+        proxy_read_timeout 120s;
+    }
+
+    location /health {
+        proxy_pass http://bakery_api/health;
+        access_log off;
+    }
+}
+```
+
+啟用站點:
+
+```bash
+sudo ln -s /etc/nginx/sites-available/bakery-api /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+```
+
+#### 5. 設定 SSL (Let's Encrypt)
+
+```bash
+# 安裝 Certbot
+sudo apt-get install certbot python3-certbot-nginx
+
+# 取得憑證
+sudo certbot --nginx -d api.bakery.example.com
+
+# 自動更新
+sudo certbot renew --dry-run
+```
+
+### 方案 2: Docker + Docker Compose
+
+#### 1. 建立生產配置
+
+建立 `docker-compose.prod.yml`:
+
+```yaml
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - /backup/mysql:/backup
+    networks:
+      - bakery_network
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+    volumes:
+      - redis_data:/data
+    networks:
+      - bakery_network
+
+  web:
+    build: .
+    restart: always
+    environment:
+      FLASK_ENV: production
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      REDIS_URL: redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+    networks:
+      - bakery_network
+
+  nginx:
+    image: nginx:alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - /var/log/nginx:/var/log/nginx
+    depends_on:
+      - web
+    networks:
+      - bakery_network
+
+volumes:
+  mysql_data:
+  redis_data:
+
+networks:
+  bakery_network:
+    driver: bridge
+```
+
+#### 2. 部署
+
+```bash
+# 設定環境變數
+export MYSQL_ROOT_PASSWORD=secure_root_password
+export MYSQL_DATABASE=bakery_prod
+export MYSQL_USER=bakery_user
+export MYSQL_PASSWORD=secure_password
+export DATABASE_URL=mysql+pymysql://bakery_user:secure_password@db:3306/bakery_prod
+export SECRET_KEY=your-production-secret-key
+export JWT_SECRET_KEY=your-production-jwt-secret-key
+
+# 啟動服務
+docker-compose -f docker-compose.prod.yml up -d
+
+# 執行遷移
+docker-compose -f docker-compose.prod.yml exec web flask db upgrade
+
+# 建立管理員
+docker-compose -f docker-compose.prod.yml exec web python manage.py create-admin
+```
+
+### 方案 3: Kubernetes (進階)
+
+建立 Kubernetes 配置檔案（範例）:
+
+```yaml
+# deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bakery-api
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: bakery-api
+  template:
+    metadata:
+      labels:
+        app: bakery-api
+    spec:
+      containers:
+      - name: api
+        image: yourusername/bakery-management:latest
+        ports:
+        - containerPort: 5000
+        env:
+        - name: FLASK_ENV
+          value: "production"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: bakery-secrets
+              key: database-url
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 30
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 5000
+          initialDelaySeconds: 5
+          periodSeconds: 5
+```
+
+## 資料庫管理
+
+### 備份
+
+```bash
+# MySQL 完整備份
+mysqldump -u bakery_user -p bakery_prod > backup_$(date +%Y%m%d_%H%M%S).sql
+
+# 自動化備份腳本
+#!/bin/bash
+BACKUP_DIR="/backup/mysql"
+DATE=$(date +%Y%m%d_%H%M%S)
+mysqldump -u bakery_user -p'password' bakery_prod | gzip > $BACKUP_DIR/bakery_$DATE.sql.gz
+
+# 保留最近 7 天的備份
+find $BACKUP_DIR -name "bakery_*.sql.gz" -mtime +7 -delete
+```
+
+### 還原
+
+```bash
+# 從備份還原
+mysql -u bakery_user -p bakery_prod < backup.sql
+
+# 從壓縮備份還原
+gunzip < backup.sql.gz | mysql -u bakery_user -p bakery_prod
+```
+
+### 資料庫遷移
+
+```bash
+# 建立遷移
+flask db migrate -m "Description of changes"
+
+# 套用遷移
+flask db upgrade
+
+# 回滾遷移
+flask db downgrade
+
+# 查看遷移歷史
+flask db history
+```
+
+## 監控與維護
+
+### 日誌管理
+
+```bash
+# 查看應用日誌
+sudo journalctl -u bakery-api -f
+
+# 查看 Nginx 日誌
+sudo tail -f /var/log/nginx/bakery-api-access.log
+sudo tail -f /var/log/nginx/bakery-api-error.log
+
+# 查看 Docker 日誌
+docker-compose logs -f web
+```
+
+### 效能監控
+
+使用 Prometheus + Grafana:
+
+```bash
+# 安裝 Prometheus
+docker run -d -p 9090:9090 prom/prometheus
+
+# 安裝 Grafana
+docker run -d -p 3000:3000 grafana/grafana
+```
+
+### 健康檢查
+
+```bash
+# 檢查 API 健康狀態
+curl https://api.bakery.example.com/health
+
+# 檢查資料庫連線
+docker-compose exec web flask shell
+>>> from app import db
+>>> db.session.execute('SELECT 1').scalar()
+```
+
+## 故障排除
+
+### 常見問題
+
+#### 1. 資料庫連線失敗
+
+```bash
+# 檢查 MySQL 服務
+sudo systemctl status mysql
+
+# 檢查連線設定
+mysql -u bakery_user -p -h localhost bakery_prod
+
+# 檢查防火牆
+sudo ufw status
+```
+
+#### 2. 應用無法啟動
+
+```bash
+# 檢查服務狀態
+sudo systemctl status bakery-api
+
+# 查看錯誤日誌
+sudo journalctl -u bakery-api -n 100
+
+# 檢查依賴
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+#### 3. 502 Bad Gateway
+
+```bash
+# 檢查 Gunicorn 是否運行
+ps aux | grep gunicorn
+
+# 檢查 Nginx 配置
+sudo nginx -t
+
+# 查看 Nginx 錯誤日誌
+sudo tail -f /var/log/nginx/error.log
+```
+
+#### 4. Docker 容器無法啟動
+
+```bash
+# 查看容器日誌
+docker-compose logs web
+
+# 檢查容器狀態
+docker-compose ps
+
+# 重新建構
+docker-compose build --no-cache web
+docker-compose up -d
+```
+
+### 效能調優
+
+#### Gunicorn 設定
+
+```python
+# 計算 workers 數量
+workers = (CPU_CORES * 2) + 1
+
+# 建議配置
+--workers 4                 # 根據 CPU 核心數調整
+--threads 2                 # 每個 worker 的執行緒數
+--worker-class gthread      # 使用執行緒
+--timeout 120               # 請求超時時間
+--max-requests 1000         # worker 重啟前處理的最大請求數
+--max-requests-jitter 50    # 隨機抖動
+```
+
+#### MySQL 優化
+
+```sql
+-- 調整連接池
+SET GLOBAL max_connections = 200;
+
+-- 查詢快取
+SET GLOBAL query_cache_size = 67108864;
+
+-- InnoDB 設定
+SET GLOBAL innodb_buffer_pool_size = 1073741824;
+```
+
+### 安全建議
+
+1. **定期更新**
+   ```bash
+   sudo apt-get update && sudo apt-get upgrade -y
+   ```
+
+2. **設定防火牆**
+   ```bash
+   sudo ufw allow 22/tcp
+   sudo ufw allow 80/tcp
+   sudo ufw allow 443/tcp
+   sudo ufw enable
+   ```
+
+3. **使用強密碼**
+   - 資料庫密碼至少 16 字元
+   - 使用密碼管理器
+   - 定期更換
+
+4. **限制 API 請求**
+   - 實施 rate limiting
+   - 使用 API key
+   - 監控異常流量
+
+---
+
+**需要協助?**  
+請參考 [GitHub Issues](https://github.com/yourusername/bakery-management-system/issues)
