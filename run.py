@@ -33,7 +33,8 @@ def wait_for_db(retries=30, delay=2):
 
 
 # 只在非測試環境下等待資料庫
-if not os.getenv("TESTING"):
+# 檢查環境變數 TESTING 是否為 "1" 或 "True"
+if os.getenv("TESTING") not in ["1", "True", "true"]:
     with app.app_context():
         wait_for_db()
         db.create_all()

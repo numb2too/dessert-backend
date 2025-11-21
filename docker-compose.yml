@@ -9,6 +9,7 @@ services:
       - FLASK_ENV=development
       - PYTHONPATH=/app
       - DATABASE_URL=${DATABASE_URL}
+      - TESTING=0 
     depends_on:
       db:
         condition: service_healthy
