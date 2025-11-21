@@ -4,7 +4,7 @@ name: CI Pipeline
 on:
   # 1. 當有人發起 Pull Request 要合併到 main 時
   pull_request:
-    branches: ["main"]
+    branches: ["main", "release"]
 
 jobs:
   test:
