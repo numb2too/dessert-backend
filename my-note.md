@@ -1,3 +1,5 @@
+## docker
+### 環境確認
 ```bash
 docker info 
 
@@ -45,4 +47,41 @@ docker image prune -a
 方法 2：指令關閉
 ```bash
 osascript -e 'quit app "Docker"'
+```
+
+### container
+停止 container
+```bash
+docker stop 9233d30b794c
+```
+刪除 container
+```bash
+docker rm my-mysql
+```
+
+### mysql 
+```bash
+# 拉取最新 MySQL 映像
+docker pull mysql:8.0
+
+# 建立並啟動容器
+docker run -d \
+  --name my-mysql \
+  -e MYSQL_ROOT_PASSWORD=YOUR_ROOT_PASSWORD \
+  -e MYSQL_DATABASE=YOUR_DATABASE \
+  -e MYSQL_USER=YOUR_USER \
+  -e MYSQL_PASSWORD=YOUR_PASSWORD \
+  -p 3306:3306 \
+  mysql:8.0
+```
+> 帳號密碼記得修改
+
+進入容器 MySQL：
+```bash
+docker exec -it my-mysql mysql -u root -p
+```
+
+## 更新 requirements.txt
+```bash
+pip freeze > requirements.txt
 ```

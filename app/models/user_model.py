@@ -1,6 +1,12 @@
-users = {
-    1: {"id": 1, "name": "Alice", "email": "alice@example.com"},
-    2: {"id": 2, "name": "Bob", "email": "bob@example.com"}
-}
+from app import db
 
-next_id = 3
+
+class User(db.Model):
+    __tablename__ = "users"
+
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
+
+    def to_dict(self):
+        return {"id": self.id, "name": self.name, "email": self.email}
