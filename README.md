@@ -2,6 +2,7 @@
 ## Python + Flask/APIFlask 架構
 
 ## 執行
+### python
 ```bash
 # 1. 建立名為 venv 的虛擬環境
 python -m venv venv
@@ -20,6 +21,22 @@ pip install -r requirements.txt
 啟動
 ```bash
 python run.py
+```
+
+### docker 
+確認 docker 資訊
+```bash
+docker info
+```
+沒有資訊的話先安裝
+```bash
+brew install --cask docker
+# install 中途斷掉的話 reinstall
+brew reinstall --cask docker
+```
+安裝成功確認有 docker info 後 執行 compose up
+```bash
+docker compose up --build
 ```
 
 ## unit test
