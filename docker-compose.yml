@@ -9,10 +9,11 @@ services:
       - FLASK_ENV=development
       - PYTHONPATH=/app
       - DATABASE_URL=${DATABASE_URL}
-      - TESTING=0 
+      # 移除 TESTING 設定,讓它預設為 None
     depends_on:
       db:
         condition: service_healthy
+    restart: unless-stopped
 
   db:
     image: mysql:8.0
@@ -26,10 +27,12 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 2s
-      timeout: 2s
-      retries: 15
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+      start_period: 10s
+    restart: unless-stopped
 
 volumes:
   mysql_data:
