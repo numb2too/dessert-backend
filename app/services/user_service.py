@@ -8,7 +8,8 @@ def get_all_users():
 
 
 def get_user_by_id(user_id):
-    user = User.query.get(user_id)
+    # 修正:使用 db.session.get() 替代 User.query.get()
+    user = db.session.get(User, user_id)
     return user.to_dict() if user else None
 
 
@@ -20,7 +21,8 @@ def create_user(data):
 
 
 def update_user(user_id, data):
-    user = User.query.get(user_id)
+    # 修正:使用 db.session.get() 替代 User.query.get()
+    user = db.session.get(User, user_id)
     if not user:
         return None
     if "name" in data:
@@ -32,7 +34,8 @@ def update_user(user_id, data):
 
 
 def delete_user(user_id):
-    user = User.query.get(user_id)
+    # 修正:使用 db.session.get() 替代 User.query.get()
+    user = db.session.get(User, user_id)
     if not user:
         return False
     db.session.delete(user)
