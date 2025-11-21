@@ -29,5 +29,14 @@ python app.py
 
 ## unit test
 ```bash
-pytest
+dessert-backend % pytest
+================================================== test session starts ==================================================
+platform darwin -- Python 3.13.7, pytest-9.0.1, pluggy-1.6.0
+rootdir: /Users/qq/dessert-backend
+collected 6 items                                                                                                       
+
+tests/test_user_routes.py ...                                                                                     [ 50%]
+tests/test_user_service.py ...                                                                                    [100%]
+
+=================================================== 6 passed in 0.17s =====
 ```
