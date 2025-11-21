@@ -1,17 +1,40 @@
-from app.models.user_model import users, next_id
+from app import db
+from app.models.user_model import User
+
+
+def get_all_users():
+    users = User.query.all()
+    return [u.to_dict() for u in users]
 
 
 def get_user_by_id(user_id):
-    return users.get(user_id)
+    user = User.query.get(user_id)
+    return user.to_dict() if user else None
 
 
 def create_user(data):
-    global next_id
-    user = {
-        "id": next_id,
-        "name": data.get("name", "No Name"),
-        "email": data.get("email", ""),
-    }
-    users[next_id] = user
-    next_id += 1
-    return user
+    user = User(name=data.get("name", "No Name"), email=data.get("email", ""))
+    db.session.add(user)
+    db.session.commit()
+    return user.to_dict()
+
+
+def update_user(user_id, data):
+    user = User.query.get(user_id)
+    if not user:
+        return None
+    if "name" in data:
+        user.name = data["name"]
+    if "email" in data:
+        user.email = data["email"]
+    db.session.commit()
+    return user.to_dict()
+
+
+def delete_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return False
+    db.session.delete(user)
+    db.session.commit()
+    return True
