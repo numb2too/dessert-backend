@@ -1,7 +1,9 @@
-from models.user_model import users, next_id
+from app.models.user_model import users, next_id
+
 
 def get_user_by_id(user_id):
     return users.get(user_id)
+
 
 def create_user(data):
     global next_id
