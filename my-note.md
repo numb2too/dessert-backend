@@ -85,3 +85,16 @@ docker exec -it my-mysql mysql -u root -p
 ```bash
 pip freeze > requirements.txt
 ```
+
+## migrate 更新 db column
+```bash
+# 設定環境變數
+# 進入 web 容器執行 flask db init
+docker compose exec web flask db init
+
+# 產生 migration
+docker compose exec web flask db migrate -m "add phone column"
+
+# 套用到資料庫
+docker compose exec web flask db upgrade
+```
