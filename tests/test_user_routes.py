@@ -132,3 +132,32 @@ class TestDeleteUser:
         json_data = res.get_json()
         assert json_data["success"] is False
         assert json_data["error"]["code"] == "NOT_FOUND"
+
+
+class TestDuplicateEmail:
+    """測試重複 email 的處理"""
+
+    def test_create_user_duplicate_email(self, client, sample_users):
+        """測試新增重複 email 的使用者"""
+        res = client.post(
+            "/api/users/",
+            json={"name": "Alice Clone", "email": "alice@example.com"},
+        )
+        assert res.status_code == 400
+        json_data = res.get_json()
+        assert json_data["success"] is False
+        assert json_data["error"]["code"] == "DUPLICATE_EMAIL"
+        assert json_data["error"]["message"] == "Email already exists"
+
+    def test_update_user_duplicate_email(self, client, sample_users):
+        """測試更新使用者時使用重複 email"""
+        user_id = sample_users[1]  # Bob
+        res = client.put(
+            f"/api/users/{user_id}",
+            json={"email": "alice@example.com"},  # 使用 Alice 的 email
+        )
+        assert res.status_code == 400
+        json_data = res.get_json()
+        assert json_data["success"] is False
+        assert json_data["error"]["code"] == "DUPLICATE_EMAIL"
+        assert json_data["error"]["message"] == "Email already exists"
