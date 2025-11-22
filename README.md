@@ -3,6 +3,8 @@
 ### 功能
 - rest api 後台
 - 新增改查 USER
+- 自動生成 API docs 
+  - http://127.0.0.1:5001/docs
 
 ### 技能
 - 透過 docker 運行 web & mysql
@@ -13,6 +15,8 @@
 - MVC 架構
 - github ci 自動測試
 - 透過 debugpy 在 docker 運行下 使用 vscode 做斷點提升 debug 效率
+- 透過 APIFlask 自動生成 api 文件
+- api error_handlers 統一回傳格式
 
 ## 執行
 ### docker (推薦)
