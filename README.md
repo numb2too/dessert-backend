@@ -16,6 +16,7 @@
 - github ci 自動測試
 - 透過 debugpy 在 docker 運行下 使用 vscode 做斷點提升 debug 效率
 - 透過 APIFlask 自動生成 api 文件
+- api error_handlers 統一回傳格式
 
 ## 執行
 ### docker (推薦)
