@@ -15,7 +15,7 @@ migrate = Migrate()  # 新增
 
 def create_app(config=None):
     """Application Factory Pattern"""
-    app = APIFlask(__name__)
+    app = APIFlask(__name__, title="甜點店員工成本系統 API", version="1.0")
 
     # 預設配置
     default_config = {

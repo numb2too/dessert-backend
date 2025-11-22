@@ -1,4 +1,5 @@
-from flask import Blueprint, request
+from apiflask import APIBlueprint
+from flask import request
 from app.services.user_service import (
     get_all_users,
     get_user_by_id,
@@ -7,7 +8,7 @@ from app.services.user_service import (
     delete_user,
 )
 
-user_bp = Blueprint("users", __name__)
+user_bp = APIBlueprint("users", __name__, url_prefix="/users")
 
 
 # 取得所有使用者
