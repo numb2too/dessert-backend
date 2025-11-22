@@ -1,4 +1,4 @@
-# 甜點ERP管理系統後台
+# 甜點後台管理系統-後端
 ## Python + Flask/APIFlask 架構
 ### 功能
 - rest api 後台
