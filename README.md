@@ -1,5 +1,18 @@
-# 甜點ERP管理系統後台
+# 甜點後台管理系統-後端
 ## Python + Flask/APIFlask 架構
+### 功能
+- rest api 後台
+- 新增改查 USER
+
+### 技能
+- 透過 docker 運行 web & mysql
+- web service 執行 rest api
+- mysql database 連接
+- pytest 做 unit test
+- 透過 migrate 更新 mysql 欄位資訊
+- MVC 架構
+- github ci 自動測試
+- 透過 debugpy 在 docker 運行下 使用 vscode 做斷點提升 debug 效率
 
 ## 執行
 ### docker (推薦)
@@ -44,6 +57,23 @@ python run.py
 > mysql 需透過 docker 開啟並連接
 
 ## unit test
+### 簡單確認 API
+```bash
+curl -X POST http://127.0.0.1:5001/api/users/ \
+     -H "Content-Type: application/json" \
+     -d '{"name":"Amy","email":"amy@test.com"}'
+```
+成功會回傳
+```bash
+{
+  "email": "amy@test.com",
+  "id": 5,
+  "name": "Amy",
+  "phone": null
+}
+```
+### pytest
+python 直接測試 pytest
 ```bash
 dessert-backend % pytest
 ================================================== test session starts ==================================================
