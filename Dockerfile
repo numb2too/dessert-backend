@@ -9,7 +9,7 @@ RUN apt-get update && \
 
 # 複製依賴檔案並安裝
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+RUN pip install --no-cache-dir -r requirements.txt 
 
 # 複製專案程式碼
 COPY . .
