@@ -2,24 +2,24 @@ FROM python:3.13-slim
 
 WORKDIR /app
 
-# 安裝 wait-for-it 和 MySQL 客戶端工具
+# 只安裝 MySQL 客戶端工具（如果需要的話）
 RUN apt-get update && \
-    apt-get install -y wait-for-it default-mysql-client && \
+    apt-get install -y default-mysql-client && \
     rm -rf /var/lib/apt/lists/*
 
 # 複製依賴檔案並安裝
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt gunicorn
 
 # 複製專案程式碼
 COPY . .
 
 # 設定環境變數
 ENV PYTHONPATH=/app
-ENV FLASK_APP=run.py
+ENV FLASK_ENV=production
 
 # 開放端口
-EXPOSE 1234
+EXPOSE 8000
 
 # 啟動應用
-CMD ["wait-for-it", "db:3306", "--timeout=60", "--", "python", "run.py"]
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "-w", "4", "--timeout", "120", "run:app"]
