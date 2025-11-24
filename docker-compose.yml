@@ -2,19 +2,21 @@ services:
   web:
     build: .
     ports:
-      - "5001:1234"
-      - "5678:5678"  # 新增 debugpy port
+      - "5001:5001"
+      - "5678:5678" # 新增 debugpy port
     volumes:
       - .:/app
     environment:
       - FLASK_ENV=development
       - PYTHONPATH=/app
-      - DATABASE_URL=${DATABASE_URL}
-      # 移除 TESTING 設定,讓它預設為 None
+      - PORT=5001 # 告訴 run.py 在容器內也要用 5001 
+      # 修改這裡：容器內互連，Host 必須是 'db' (Service Name)
+      - DATABASE_URL=mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@db:3306/${MYSQL_DATABASE}
     depends_on:
       db:
         condition: service_healthy
-    restart: unless-stopped
+    # 改用 python run.py 啟動以支援熱重載和自定義 Port
+    command: [ "python", "run.py" ]
 
   db:
     image: mysql:8.0
@@ -28,7 +30,7 @@ services:
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u${MYSQL_USER}", "-p${MYSQL_PASSWORD}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u${MYSQL_USER}", "-p${MYSQL_PASSWORD}" ]
       interval: 3s
       timeout: 3s
       retries: 20
