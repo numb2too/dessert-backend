@@ -67,6 +67,14 @@ flask run --port 5001
 ```bash
 docker build -t dessert-api .
 ```
+可本地測試
+```bash
+docker run --rm \
+  -p 5001:8000 \
+  --env PORT=8000 \
+  --env DATABASE_URL="mysql+pymysql://your_user:your_password@host.docker.internal:3306/your_db" \
+  your-container-name 
+```
 
 ## unit test
 ### 簡單確認 API
