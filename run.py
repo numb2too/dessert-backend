@@ -57,5 +57,9 @@ app = create_app()
 if os.getenv("FLASK_ENV") != "testing":
     wait_for_db(app)
 
+
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=1234)
+    # 修改這裡：讀取環境變數 PORT，預設從 8000 改為 5001
+    # 這樣 python run.py 直接執行時就會跑在 5001
+    port = int(os.environ.get("PORT", 5001))
+    app.run(host="0.0.0.0", port=port)

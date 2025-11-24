@@ -19,7 +19,7 @@
 - api error_handlers 統一回傳格式
 
 ## 執行
-### docker (推薦)
+### docker compose (推薦)
 確認 docker 資訊
 ```bash
 docker info
@@ -34,9 +34,6 @@ brew reinstall --cask docker
 ```bash
 docker compose up --build
 ```
-> 使用 docker 啟動資料才會存到 mysql
-> 因為 mysql 是跟 web 一起啟動
-> 但有分不同 container 
 
 ### python
 ```bash
@@ -53,12 +50,23 @@ source venv/bin/activate
 ```bash
 pip install -r requirements.txt
 ```
-啟動
+啟動資料庫
 ```bash
-python run.py
+docker-compose up -d db
 ```
-> 資料只存在 memory 沒有存到 mysql
-> mysql 需透過 docker 開啟並連接
+```bash
+# 確保已啟動虛擬環境並安裝套件
+python run.py
+# 也可使用
+flask run --port 5001
+```
+> 結果：App 跑在 http://localhost:5001。
+> 原理：讀取 .env，透過 127.0.0.1:3306 連到 Docker 資料庫。
+
+### docker
+```bash
+docker build -t dessert-api .
+```
 
 ## unit test
 ### 簡單確認 API
