@@ -9,7 +9,7 @@ RUN apt-get update && \
 
 # 複製依賴檔案並安裝
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt gunicorn
+RUN pip install --no-cache-dir -r requirements.txt 
 
 # 複製專案程式碼
 COPY . .
@@ -22,4 +22,5 @@ ENV FLASK_ENV=production
 EXPOSE 8000
 
 # 啟動應用
-CMD ["gunicorn", "-b", "0.0.0.0:8000", "-w", "4", "--timeout", "120", "run:app"]
+# 加入 access-logfile 和 error-logfile 設定
+CMD ["gunicorn", "-b", "0.0.0.0:8000", "-w", "4", "--timeout", "120", "--access-logfile", "-", "--error-logfile", "-", "run:app"]
