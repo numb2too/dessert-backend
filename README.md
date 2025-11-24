@@ -2,7 +2,7 @@
 ## Python + Flask/APIFlask 架構
 ### 功能
 - rest api 後台
-- 新增改查 USER
+- 增刪改查 USER
 - 自動生成 API docs 
   - http://127.0.0.1:5001/docs
 
