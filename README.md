@@ -1,6 +1,7 @@
 # 甜點後台管理系統-後端
-![alt text](docs/image.png)
 https://disturbing-riki-numb2too-a14e6a03.koyeb.app/docs
+![alt text](docs/image.png)
+![alt text](docs/image2.png)
 
 ## Python + Flask/APIFlask 架構
 ### 功能
