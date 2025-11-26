@@ -1,7 +1,7 @@
 import os
 import pytest
+from flask_jwt_extended import create_access_token
 
-# 設定測試環境（必須在 import app 之前）
 os.environ["FLASK_ENV"] = "testing"
 
 from run import create_app
@@ -11,10 +11,8 @@ from app.models.user_model import User
 
 @pytest.fixture(scope="function")
 def app():
-    """建立測試用的 Flask app (每個測試獨立)"""
+    """建立測試用的 Flask app"""
     app = create_app("testing")
-
-    # 可覆蓋特定配置（如使用記憶體資料庫）
     app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///:memory:"
 
     with app.app_context():
@@ -38,8 +36,18 @@ def sample_users(app):
             User(name="Alice", email="alice@example.com"),
             User(name="Bob", email="bob@example.com"),
         ]
+        users[0].set_password("password123")
+        users[1].set_password("password123")
+
         db.session.add_all(users)
         db.session.commit()
 
-        # 回傳 user ids 供測試使用
         yield [u.id for u in users]
+
+
+@pytest.fixture
+def auth_token(app, sample_users):
+    """產生測試用的 JWT token"""
+    with app.app_context():
+        token = create_access_token(identity=sample_users[0])
+        return token

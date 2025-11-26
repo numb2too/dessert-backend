@@ -9,29 +9,33 @@ class Config:
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
+    JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "dev-jwt-key")
+    JWT_ACCESS_TOKEN_EXPIRES = 3600  # 1 小時
+
+    # Swagger UI
+    SECURITY_SCHEMES = {
+        "BearerAuth": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+        }
+    }
 
 
 class DevelopmentConfig(Config):
-    """開發環境"""
-
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL", "sqlite:///dev.db")
 
 
 class TestingConfig(Config):
-    """測試環境"""
-
     TESTING = True
     SQLALCHEMY_DATABASE_URI = "sqlite:///:memory:"
-    # PROPAGATE_EXCEPTIONS 保持預設 (True)
-    # 讓未預期錯誤直接拋出，方便除錯
 
 
 class ProductionConfig(Config):
-    """生產環境"""
-
     DEBUG = False
     SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    JWT_ACCESS_TOKEN_EXPIRES = 86400  # 24 小時
 
 
 config = {
