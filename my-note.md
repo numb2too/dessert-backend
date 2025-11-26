@@ -98,3 +98,5 @@ docker compose exec web flask db migrate -m "add phone column"
 # 套用到資料庫
 docker compose exec web flask db upgrade
 ```
+
+cge
