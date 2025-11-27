@@ -42,14 +42,18 @@ class TestRegister:
             "/api/auth/register",
             json={"name": "Test User", "email": "test@example.com", "password": "123"},
         )
-        assert res.status_code == 400
+        assert res.status_code == 422
         data = res.get_json()
         assert data["success"] is False
 
     def test_register_missing_fields(self, client):
         """測試缺少必填欄位"""
         res = client.post("/api/auth/register", json={"email": "test@example.com"})
-        assert res.status_code == 400
+        assert res.status_code == 422
+        data = res.get_json()
+        assert data["success"] is False
+        assert "error" in data
+        assert data["error"]["code"] == "HTTP_422"
 
 
 class TestLogin:
@@ -97,6 +101,7 @@ class TestGetCurrentUser:
         assert res.status_code == 200
         data = res.get_json()
         assert data["success"] is True
+        assert data["data"]["name"] == "Alice"
         assert "email" in data["data"]
 
     def test_get_current_user_no_token(self, client):

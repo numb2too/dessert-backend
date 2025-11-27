@@ -41,6 +41,11 @@ class UserProfileSchema(Schema):
     updated_at = String()
 
 
+class UserResponseSchema(Schema):
+    success = Boolean(required=True)
+    data = Nested(UserProfileSchema, required=True)
+
+
 class TokenDataSchema(Schema):
     access_token = String(required=True)
     user = Nested(UserProfileSchema, required=True)

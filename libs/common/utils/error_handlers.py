@@ -12,7 +12,7 @@ class NotFoundError(HTTPError):
 class ValidationError(HTTPError):
     """驗證錯誤"""
 
-    status_code = 400
+    status_code = 422
     message = "Validation failed"
     extra_data = {"error_code": "VALIDATION_ERROR"}
 

@@ -8,7 +8,7 @@ from libs.common.utils.schemas import (
     LoginSchema,
     ChangePasswordSchema,
     TokenResponseSchema,
-    UserProfileSchema,
+    UserResponseSchema,
 )
 
 auth_bp = APIBlueprint("auth", __name__, tag="Authentication")
@@ -22,7 +22,7 @@ def register(json_data):
     user = register_user(json_data)
 
     # 註冊成功後自動產生 JWT token
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
 
     return success_response({"access_token": access_token, "user": user.to_dict()}, 201)
 
@@ -35,14 +35,14 @@ def login(json_data):
     user = authenticate_user(json_data["email"], json_data["password"])
 
     # 產生 JWT token
-    access_token = create_access_token(identity=user.id)
+    access_token = create_access_token(identity=str(user.id))
 
     return success_response({"access_token": access_token, "user": user.to_dict()})
 
 
 @auth_bp.get("/me")
 @jwt_required()
-@auth_bp.output(UserProfileSchema)
+@auth_bp.output(UserResponseSchema)
 def get_current_user():
     """取得當前登入使用者資訊"""
     return success_response(current_user.to_dict())
