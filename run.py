@@ -37,26 +37,7 @@ def create_app(config_name=None):
     return app
 
 
-def wait_for_db(app, retries=30, delay=2):
-    """等待資料庫連線就緒"""
-    for i in range(retries):
-        try:
-            with app.app_context():
-                with db.engine.connect() as conn:
-                    conn.execute(text("SELECT 1"))
-            print("✅ Database connected!")
-            return True
-        except Exception as e:
-            print(f"⏳ Waiting for database... ({i + 1}/{retries})")
-            time.sleep(delay)
-    raise Exception("❌ Could not connect to database after retries")
-
-
 app = create_app()
-
-if os.getenv("FLASK_ENV") != "testing":
-    wait_for_db(app)
-
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5001))
