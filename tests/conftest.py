@@ -67,3 +67,9 @@ def auth_token(app, sample_users):
         # 因為 identity 使用的是使用者 ID是int型態，所以轉成字串
         token = create_access_token(identity=str(sample_users[0]))
         return token
+
+
+@pytest.fixture
+def auth_headers(auth_token):
+    """建立認證 headers"""
+    return {"Authorization": f"Bearer {auth_token}"}
