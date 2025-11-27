@@ -2,27 +2,36 @@ from apiflask import HTTPError
 
 
 class NotFoundError(HTTPError):
-    """資源不存在"""
+    """404 資源不存在錯誤"""
 
     status_code = 404
-    message = "Resource not found"
-    extra_data = {"error_code": "NOT_FOUND"}
+
+    def __init__(self, message="Resource not found", extra_data=None):
+        self.message = message
+        self.extra_data = extra_data or {"error_code": "NOT_FOUND"}
+        super().__init__()
 
 
 class ValidationError(HTTPError):
     """驗證錯誤"""
 
     status_code = 422
-    message = "Validation failed"
-    extra_data = {"error_code": "VALIDATION_ERROR"}
+
+    def __init__(self, message="Validation failed", extra_data=None):
+        self.message = message
+        self.extra_data = extra_data or {"error_code": "VALIDATION_ERROR"}
+        super().__init__()
 
 
 class UnauthorizedError(HTTPError):
-    """未授權"""
+    """401 未授權錯誤"""
 
     status_code = 401
-    message = "Unauthorized"
-    extra_data = {"error_code": "UNAUTHORIZED"}
+
+    def __init__(self, message="Unauthorized", extra_data=None):
+        self.message = message
+        self.extra_data = extra_data or {"error_code": "UNAUTHORIZED"}
+        super().__init__()
 
 
 def register_error_handlers(app):

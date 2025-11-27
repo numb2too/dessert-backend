@@ -31,7 +31,7 @@ class TestRegister:
                 "password": "password123",
             },
         )
-        assert res.status_code == 400
+        assert res.status_code == 422
         data = res.get_json()
         assert data["success"] is False
         assert "already exists" in data["error"]["message"].lower()

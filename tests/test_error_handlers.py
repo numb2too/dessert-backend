@@ -31,7 +31,7 @@ class TestErrorResponses:
         json_data = res.get_json()
         assert json_data["success"] is False
 
-    def test_validation_error_response_format(self, client, auth_token):
+    def test_validation_error_response_format(self, client):
         """測試驗證錯誤回應格式"""
         res = client.post(
             "/api/auth/register", json={}  # 改用註冊端點  # 空 JSON 會觸發驗證錯誤

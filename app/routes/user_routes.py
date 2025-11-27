@@ -13,18 +13,6 @@ from flask import request
 user_bp = APIBlueprint("users", __name__, tag="Users")
 
 
-@user_bp.get("/profile")
-@jwt_required()
-@user_bp.output(UserProfileSchema)
-def profile():
-    """取得個人資料"""
-    return {
-        "id": current_user.id,
-        "email": current_user.email,
-        "name": current_user.name,
-    }
-
-
 @user_bp.get("/")
 @jwt_required()
 def list_users():
