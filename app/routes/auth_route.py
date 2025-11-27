@@ -13,6 +13,8 @@ from libs.common.utils.schemas import (
 
 auth_bp = APIBlueprint("auth", __name__, tag="Authentication")
 
+auth_security = [{"BearerAuth": []}]
+
 
 @auth_bp.post("/register")
 @auth_bp.input(RegisterSchema)
@@ -42,6 +44,7 @@ def login(json_data):
 
 @auth_bp.get("/me")
 @jwt_required()
+@auth_bp.doc(security=auth_security)
 @auth_bp.output(UserResponseSchema)
 def get_current_user():
     """取得當前登入使用者資訊"""
@@ -50,6 +53,7 @@ def get_current_user():
 
 @auth_bp.post("/change-password")
 @jwt_required()
+@auth_bp.doc(security=auth_security)
 @auth_bp.input(ChangePasswordSchema)
 def change_user_password(json_data):
     """修改密碼"""
