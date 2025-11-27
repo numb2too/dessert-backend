@@ -156,7 +156,7 @@ class TestAuthenticateUser:
                 authenticate_user("test@example.com", "wrongpassword")
 
             # 不應該透露具體是密碼錯誤
-            assert "Invalid email or password" in str(exc_info.value.message.message)
+            assert "Invalid email or password" in str(exc_info.value.message)
 
     def test_authenticate_user_wrong_email(self, app):
         """測試錯誤 email"""
@@ -165,7 +165,7 @@ class TestAuthenticateUser:
                 authenticate_user("nonexistent@example.com", "password123")
 
             # 不應該透露具體是帳號不存在
-            assert "Invalid email or password" in str(exc_info.value.message.message)
+            assert "Invalid email or password" in str(exc_info.value.message)
 
     def test_authenticate_user_inactive_account(self, app):
         """測試已停用的帳號"""
@@ -182,7 +182,7 @@ class TestAuthenticateUser:
             with pytest.raises(UnauthorizedError) as exc_info:
                 authenticate_user("inactive@example.com", "password123")
 
-            assert "Account is disabled" in str(exc_info.value.message.message)
+            assert "Account is disabled" in str(exc_info.value.message)
 
     def test_authenticate_user_missing_email(self, app):
         """測試缺少 email"""
@@ -190,9 +190,7 @@ class TestAuthenticateUser:
             with pytest.raises(ValidationError) as exc_info:
                 authenticate_user("", "password123")
 
-            assert "Email and password are required" in str(
-                exc_info.value.message.message
-            )
+            assert "Email and password are required" in str(exc_info.value.message)
 
     def test_authenticate_user_missing_password(self, app):
         """測試缺少密碼"""
@@ -200,9 +198,7 @@ class TestAuthenticateUser:
             with pytest.raises(ValidationError) as exc_info:
                 authenticate_user("test@example.com", "")
 
-            assert "Email and password are required" in str(
-                exc_info.value.message.message
-            )
+            assert "Email and password are required" in str(exc_info.value.message)
 
     def test_authenticate_user_case_sensitive_email(self, app):
         """測試 email 大小寫是否影響認證"""
@@ -262,7 +258,7 @@ class TestChangePassword:
             with pytest.raises(UnauthorizedError) as exc_info:
                 change_password(user.id, "wrongpassword", "newpassword")
 
-            assert "Invalid old password" in str(exc_info.value.message.message)
+            assert "Invalid old password" in str(exc_info.value.message)
 
     def test_change_password_user_not_found(self, app):
         """測試使用者不存在"""
@@ -270,7 +266,7 @@ class TestChangePassword:
             with pytest.raises(UnauthorizedError) as exc_info:
                 change_password(99999, "oldpassword", "newpassword")
 
-            assert "User not found" in str(exc_info.value.message.message)
+            assert "User not found" in str(exc_info.value.message)
 
     def test_change_password_too_short(self, app):
         """測試新密碼太短"""
@@ -286,7 +282,7 @@ class TestChangePassword:
             with pytest.raises(ValidationError) as exc_info:
                 change_password(user.id, "oldpassword", "12345")  # 只有 5 個字元
 
-            assert "at least 6 characters" in str(exc_info.value.message.message)
+            assert "at least 6 characters" in str(exc_info.value.message)
 
     def test_change_password_missing_old_password(self, app):
         """測試缺少舊密碼"""
@@ -303,7 +299,7 @@ class TestChangePassword:
                 change_password(user.id, "", "newpassword")
 
             assert "Old password and new password are required" in str(
-                exc_info.value.message.message
+                exc_info.value.message
             )
 
     def test_change_password_missing_new_password(self, app):
@@ -321,7 +317,7 @@ class TestChangePassword:
                 change_password(user.id, "oldpassword", "")
 
             assert "Old password and new password are required" in str(
-                exc_info.value.message.message
+                exc_info.value.message
             )
 
     def test_change_password_same_as_old(self, app):
