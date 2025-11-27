@@ -59,7 +59,7 @@ docker stop 9233d30b794c
 docker rm my-mysql
 ```
 
-### mysql 
+### 啟動 mysql 
 ```bash
 # 拉取最新 MySQL 映像
 docker pull mysql:8.0
@@ -76,9 +76,19 @@ docker run -d \
 ```
 > 帳號密碼記得修改
 
-進入容器 MySQL：
+### 連線到測試資料庫
 ```bash
-docker exec -it my-mysql mysql -u root -p
+docker compose exec your-container mysql -u your_user -p
+```
+
+### dockerfile
+- 連接本地 db 執行 dockerfile
+```bash
+docker run --rm \
+  -p 5001:8000 \
+  --env PORT=8000 \
+  --env DATABASE_URL="mysql+pymysql://your_user:your_password@host.docker.internal:3306/your_db" \
+  your-container-name
 ```
 
 ## 更新 requirements.txt
@@ -87,14 +97,49 @@ pip freeze > requirements.txt
 ```
 
 ## migrate 更新 db column
+### 初始化（如果還沒做過）
+做一次就好
 ```bash
-# 設定環境變數
-# 進入 web 容器執行 flask db init
-docker compose exec web flask db init
-
-# 產生 migration
-docker compose exec web flask db migrate -m "add phone column"
-
-# 套用到資料庫
-docker compose exec web flask db upgrade
+flask db init
 ```
+
+### 產生 migration
+```bash
+flask db migrate -m "add phone column"
+```
+
+### 套用到資料庫
+```bash
+flask db upgrade
+```
+
+### 修改版本好
+如果不小心刪除 migrate 資料夾
+查詢目前的版本號
+```bash
+flask db history
+```
+修改版本好
+```bash
+docker compose exec <docker-container-name> mysql -u your_user -p your_database -e "UPDATE alembic_version SET version_num='ed1234kjadfc3';"
+```
+
+## database
+
+查詢已有的 user
+```bash
+SELECT User, Host FROM mysql.user;
+```
+建立使用者
+```bash
+CREATE USER 'your_user'@'%' IDENTIFIED BY 'your_password';
+```
+設定權限
+```bash
+GRANT SELECT, INSERT, UPDATE, DELETE
+ON dessert.*
+TO 'your_user'@'%';
+FLUSH PRIVILEGES;
+```
+
+
