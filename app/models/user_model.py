@@ -17,6 +17,7 @@ class User(db.Model):
     updated_at = db.Column(
         db.DateTime, server_default=db.func.now(), onupdate=db.func.now()
     )
+    address = db.Column(db.String(255), nullable=True)
 
     def set_password(self, password):
         """設定密碼（加密）"""
