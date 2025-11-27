@@ -10,9 +10,10 @@ class TestRegister:
         res = client.post(
             "/api/auth/register",
             json={
-                "name": "Test User",
+                "name": "test",
                 "email": "test@example.com",
                 "password": "password123",
+                "phone": "0912345678",
             },
         )
         assert res.status_code == 201
