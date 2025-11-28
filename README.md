@@ -1,28 +1,30 @@
 # 甜點後台管理系統-後端
-https://disturbing-riki-numb2too-a14e6a03.koyeb.app/docs
+https://disturbing-riki-numb2too-a14e6a03.koyeb.app/
 ![alt text](docs/image1.png)
 ![alt text](docs/image3.png)
 
 ## Python + Flask/APIFlask 架構
 ### 功能
 - rest api 後台
-- 增刪改查 USER
+- 登入/註冊
+- 刪改查 USER
 - 自動生成 API docs 
   - http://127.0.0.1:5001/docs
 
 ### 技能
-- 透過 docker 運行 web & mysql
-- web service 執行 rest api
+- 透過 docker compose 運行 web & mysql
+- Dockerfile 設定環境變數
 - mysql database 連接
 - pytest 做 unit test
-- 透過 migrate 更新 mysql 欄位資訊
+- 透過 migrate 更新 database 欄位資訊
 - MVC 架構
-- github ci/cd 自動測試
+- github actions ci/cd 自動部署
 - 透過 debugpy 在 docker 運行下 使用 vscode 做斷點提升 debug 效率
 - 透過 APIFlask 自動生成 api 文件
 - api error_handlers 統一回傳格式
 - koyeb 自動部署 web server [可參考](docs/koyeb.md)
 - TiDB 雲端部署 mysql server [可參考](docs/TiDB.md)
+- JWT token 透過 flask-jwt-extended 進行驗證
 
 ## 執行
 ### docker compose (推薦)
