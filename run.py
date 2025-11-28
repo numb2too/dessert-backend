@@ -1,6 +1,7 @@
 import os
 import time
 from apiflask import APIFlask
+from flask import request
 from sqlalchemy import text
 from flask_migrate import Migrate
 
@@ -8,7 +9,7 @@ from app import db
 from app.routes.user_routes import user_bp
 from app.routes.auth_route import auth_bp
 from config import config
-from libs.common.utils.error_handlers import register_error_handlers
+from libs.common.utils.error_handlers import NotFoundError, register_error_handlers
 from libs.common.config.jwt_config import register_jwt_callbacks
 
 migrate = Migrate()
@@ -19,8 +20,22 @@ def create_app(config_name=None):
     if config_name is None:
         config_name = os.getenv("FLASK_ENV", "development")
 
+    IS_PRODUCTION = config_name == "production"
+
     app = APIFlask(__name__, title="甜點店員工成本系統 API", version="1.0")
     app.config.from_object(config[config_name])
+
+    # ===== 生產環境直接關閉 /docs =====
+    if IS_PRODUCTION:
+
+        @app.before_request
+        def disable_docs_in_production():
+            if request.path.startswith(("/docs", "/openapi.json", "/openapi.yaml")):
+                raise NotFoundError(message="XXX not found")
+
+    @app.get("/")
+    def health_check():
+        return {"status": "healthy", "service": "甜點店員工成本系統", "version": "1.0"}
 
     # 初始化擴展
     db.init_app(app)
